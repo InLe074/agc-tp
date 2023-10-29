@@ -137,20 +137,30 @@ def abundance_greedy_clustering(amplicon_file: Path, minseqlen: int, mincount: i
     :param kmer_size: (int) A fournir mais non utilise cette annee
     :return: (list) A list of all the [OTU (str), count (int)] .
     """
-    dereplication = list(dereplication_fulllength(amplicon_file, minseqlen, mincount))
-    otu = [list(dereplication[0])]
-    for sequence, count in dereplication[1:]:
-        app = True
-        for seq_j, count_j in otu:
-            aligned_seq = nw.global_align(seq_j, sequence, gap_open=-1, gap_extend=-1,
-                                         matrix=str(Path(__file__).parent / "MATCH"))
-            if get_identity(aligned_seq) > 97:
-                app = False
-                break
-        if app:
-            otu.append([sequence, count])
+    otu_list = [] 
+    np.int = int
 
-    return otu
+    unique_seq = list(dereplication_fulllength(amplicon_file, minseqlen, mincount))
+
+    for seq, count in unique_seq:
+        is_similar = False
+
+        for otu_sequence, otu_count in otu_list:
+            alignment = nw.global_align(seq, otu_sequence, gap_open=-1, gap_extend=-1,
+                                        matrix=str(Path("/home/abdif/Metagenomique_1/agc/MATCH").parent / "MATCH"))
+            aligned_sequence, aligned_otu_sequence = alignment
+
+            identical_count = sum(a == b for a, b in zip(aligned_sequence, aligned_otu_sequence))
+            identity = (identical_count / len(aligned_sequence)) * 100.0
+
+            if identity > 97:
+                is_similar = True
+                break
+
+        if not is_similar:
+            otu_list.append((seq, count))
+
+    return otu_list
 
 
 def write_OTU(OTU_list: List, output_file: Path) -> None:

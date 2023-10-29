@@ -186,6 +186,17 @@ def main(): # pragma: no cover
     args = get_arguments()
     # Votre programme ici
 
+    otu_list = abundance_greedy_clustering(
+        amplicon_file=args.amplicon_file,
+        minseqlen=args.minseqlen,
+        mincount=args.mincount,
+        chunk_size=100,  # Valeur fixe puisqu'elle n'est pas utilisée cette année
+        kmer_size=8,  # Valeur fixe puisqu'elle n'est pas utilisée cette année
+    )
+
+    # Write the OTU sequences to the output file
+    write_OTU(otu_list, args.output_file)
+
 
 if __name__ == '__main__':
     main()
